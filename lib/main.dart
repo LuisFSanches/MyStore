@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
           textTheme: tema.textTheme.apply(fontFamily:'Lato' )
         ),
         
-        home:  const ProductsOverviewPage(),
+        home:  ProductsOverviewPage(),
         routes: {
           AppRoutes.PRODUCT_DETAIL: (ctx)=>const ProductDetailPage(),
         },
