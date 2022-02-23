@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:my_store/components/app_drawer.dart';
+import 'package:my_store/components/badge.dart';
 import 'package:my_store/components/product_grid.dart';
+import 'package:my_store/models/cart.dart';
 import 'package:my_store/models/product_list.dart';
+import 'package:my_store/utils/app_routes.dart';
 import 'package:provider/provider.dart';
 
 enum FilterOptions{
@@ -34,7 +38,7 @@ class _ProductsOverviewPageState extends State<ProductsOverviewPage> {
               PopupMenuItem(
                 child: Text('Todos'),
                 value: FilterOptions.All,
-              )
+              ),
             ],
             onSelected: (FilterOptions selectedValue){
              setState(() {
@@ -43,13 +47,24 @@ class _ProductsOverviewPageState extends State<ProductsOverviewPage> {
               } else{
                     _showFavoriteOnly = false;
               }
-              print(_showFavoriteOnly);
              });
             }
+          ),
+          Consumer<Cart>(
+            builder:(ctx, cart, child) =>Badge(
+              value: cart.itemsCount.toString(),
+              child: IconButton(
+                onPressed: (){
+                  Navigator.of(context).pushNamed(AppRoutes.CART);
+                }, 
+                icon: Icon(Icons.shopping_cart)
+              ),
+            ),
           )
         ],
       ),
-      body:  ProductGrid(_showFavoriteOnly)
+      body:  ProductGrid(_showFavoriteOnly),
+      drawer: AppDrawer(),
     );
   }
 }
