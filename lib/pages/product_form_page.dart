@@ -22,6 +22,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _formData = Map<String, Object>();
 
+  bool _isLoading = false;
+
   @override
   void initState(){
     super.initState();
@@ -68,16 +70,44 @@ class _ProductFormPageState extends State<ProductFormPage> {
     return isValidUrl && endsWithFile;
   }
 
-  void _submitForm(){
+  Future <void> _submitForm() async{
     final isValid = _formKey.currentState?.validate() ?? false;
     if(!isValid){
       return;
     }
 
     _formKey.currentState?.save();
-    Provider.of<ProductList>(context,listen:false).saveProduct(_formData);
-    Navigator.of(context).pop();
-  }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await Provider.of<ProductList>(
+      context,
+      listen:false
+      ).saveProduct(_formData);
+      Navigator.of(context).pop();
+    }
+    catch(error){
+        showDialog<void>(
+          context: context, 
+          builder: (ctx)=> AlertDialog(
+            title: Text('Ocorreu um erro para salvar o produto.'),
+            actions: [
+              TextButton(
+                onPressed: ()=> Navigator.of(context).pop(), 
+                child: Text('Ok')
+              )
+            ],
+          )
+        );
+      }
+      finally{
+        setState(() => _isLoading = false);
+      }
+  } 
+
 
   @override
   Widget build(BuildContext context) {
@@ -91,12 +121,13 @@ class _ProductFormPageState extends State<ProductFormPage> {
           )
         ],
       ),
-      body: Form(
+      body: _isLoading ? Center(child: CircularProgressIndicator(),)
+      : Form(
         key: _formKey,
         child: ListView(
           children: [
             TextFormField(
-              initialValue: _formData['name'].toString(),
+              initialValue: _formData['name']?.toString(),
               decoration: const InputDecoration(labelText: 'Nome'),
               textInputAction: TextInputAction.next,
               onFieldSubmitted: (_){
@@ -115,7 +146,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
               },
             ),
             TextFormField(
-              initialValue: _formData['price'].toString(),
+              initialValue: _formData['price']?.toString(),
               decoration: const InputDecoration(labelText: 'Preço'),
               textInputAction: TextInputAction.next,
               focusNode: _priceFocus,
@@ -138,7 +169,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
 
             ),
             TextFormField(
-              initialValue: _formData['description'].toString(),
+              initialValue: _formData['description']?.toString(),
               decoration: const InputDecoration(labelText: 'Descrição'),
               focusNode: _descriptionFocus,
               keyboardType: TextInputType.multiline,
